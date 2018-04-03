@@ -7,12 +7,8 @@ docker pull siriuszg/k8s-kubectl:TAG
 
 ##### Docker tag:
 
-* v1.4.1
-* v1.5.4-alpha
-* v1.5.4-alpha2
-* v1.6.7-alpha
-* v1.6.7-job-alpha
-* v1.6.7-job-alpha2
+* v1.8.10
+* v1.8.10-job
 
 ##### How to use:
 

@@ -22,13 +22,6 @@ JOB_ENVIRONMENT=$7
 JOB_ARGS=$8
 KUBE_API=$9
 
-#k8s set context
-
-#kubectl config set-cluster k8scluster --server=$KUBE_API --certificate-authority=/usr/local/kube/ca.crt
-#kubectl config set-credentials cluster-admin --client-certificate=/usr/local/kube/kubecfg.crt --client-key=/usr/local/kube/kubecfg.key
-#kubectl config set-context k8sadmincontext --cluster=k8scluster --user=cluster-admin
-#kubectl config use-context k8sadmincontext
-
 #function
 
 create_cronjob_config()
@@ -51,18 +44,6 @@ create_cronjob_config()
 create_cronjob_config
 echo "Cron job ${JOB_NAMESPACE}.${JOB_NAME}, Apply a configuration to a resource."
 kubectl apply -f ./cronjob.json --namespace=$JOB_NAMESPACE
-
-# if kubectl get cronjob -l cron-job=$JOB_NAME --namespace=$JOB_NAMESPACE | grep $JOB_NAME &> /dev/null; then
-#   echo "Cron job ${JOB_NAMESPACE}.${JOB_NAME} already exists. Apply a configuration to a resource."
-#   kubectl apply -f ./cronjob.json --namespace=$JOB_NAMESPACE
-# else
-#   echo "Create cron job ${JOB_NAMESPACE}.${JOB_NAME} ."
-#   if [ -f cronjob.json ]; then
-#     kubectl create -f ./cronjob.json --namespace=$JOB_NAMESPACE
-#   else
-#     echo "Lost cronjob.json."
-#   fi
-# fi
 
 exit 0;
 

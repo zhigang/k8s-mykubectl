@@ -24,13 +24,6 @@ KUBE_SERVICE_PORTS=$9
 KUBE_API=$10
 KUBE_SVC_ANNOTATIONS=$11
 
-#k8s set context
-
-#kubectl config set-cluster k8scluster --server=$KUBE_API --certificate-authority=/usr/local/kube/ca.crt
-#kubectl config set-credentials cluster-admin --client-certificate=/usr/local/kube/kubecfg.crt --client-key=/usr/local/kube/kubecfg.key
-#kubectl config set-context k8sadmincontext --cluster=k8scluster --user=cluster-admin
-#kubectl config use-context k8sadmincontext
-
 #function
 
 create_controller_config()
@@ -48,24 +41,18 @@ create_controller_config()
 
 # deploy
 
-if ! kubectl get namespace | grep "${KUBE_NAMESPACE}" &> /dev/null; then
-  echo "Create namespace ${KUBE_NAMESPACE}."
-  kubectl create namespace $KUBE_NAMESPACE
-fi
+# if ! kubectl get namespace | grep "${KUBE_NAMESPACE}" &> /dev/null; then
+#   echo "Create namespace ${KUBE_NAMESPACE}."
+#   kubectl create namespace $KUBE_NAMESPACE
+# fi
 
 create_controller_config
 
-if kubectl get deploy -l app=$KUBE_APP --namespace=$KUBE_NAMESPACE | grep $KUBE_APP &> /dev/null; then
-  echo "Deployment ${KUBE_NAMESPACE}.${KUBE_APP} already exists. Apply a configuration to a resource."
-  # kubectl set image deployment/$KUBE_APP $KUBE_APP=$KUBE_IMAGE --namespace=$KUBE_NAMESPACE
-  kubectl apply -f ./controller.json --namespace=$KUBE_NAMESPACE
+if [ -f controller.json ]; then
+  echo "Deployment ${KUBE_NAMESPACE}.${KUBE_APP}, Apply a configuration to a resource."
+  kubectl apply -f ./controller.json
 else
-  echo "Create deployment ${KUBE_NAMESPACE}.${KUBE_APP} ."
-  if [ -f controller.json ]; then
-    kubectl create -f ./controller.json --namespace=$KUBE_NAMESPACE
-  else
-    echo "Lost controller.json."
-  fi
+  echo "Lost controller.json."
 fi
 
 if [ "${KUBE_SERVICE_TYPE}" = "" ]; then
@@ -80,17 +67,12 @@ echo
 cat service.json
 echo
 
-if kubectl get svc -l app=$KUBE_APP --namespace=$KUBE_NAMESPACE | grep $KUBE_APP &> /dev/null; then
-  echo "Service ${KUBE_NAMESPACE}.${KUBE_APP} already exists. Apply a configuration to a resource."
-  kubectl apply -f ./service.json --namespace=$KUBE_NAMESPACE
+if [ -f ./service.json ]; then
+  echo "Service ${KUBE_NAMESPACE}.${KUBE_APP}, Apply a configuration to a resource."
+  kubectl apply -f ./service.json
 else
-  echo "Create service ${KUBE_NAMESPACE}.${KUBE_APP}."
-
-  if [ -f ./service.json ]; then
-    kubectl create --namespace=$KUBE_NAMESPACE -f ./service.json
-  else
     echo "Lost service.json."
-  fi
 fi
+
 exit 0;
 
