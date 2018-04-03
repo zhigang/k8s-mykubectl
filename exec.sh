@@ -1,5 +1,7 @@
 #!/bin/bash
-set -e
+set -o errexit
+set -o nounset
+set -o pipefail
 
 if [[ "$1" == "help" ]]; then
   cat exechelp
