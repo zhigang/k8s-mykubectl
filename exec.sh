@@ -26,10 +26,10 @@ KUBE_SVC_ANNOTATIONS=$11
 
 #k8s set context
 
-kubectl config set-cluster k8scluster --server=$KUBE_API --certificate-authority=/usr/local/kube/ca.crt
-kubectl config set-credentials cluster-admin --client-certificate=/usr/local/kube/kubecfg.crt --client-key=/usr/local/kube/kubecfg.key
-kubectl config set-context k8sadmincontext --cluster=k8scluster --user=cluster-admin
-kubectl config use-context k8sadmincontext
+#kubectl config set-cluster k8scluster --server=$KUBE_API --certificate-authority=/usr/local/kube/ca.crt
+#kubectl config set-credentials cluster-admin --client-certificate=/usr/local/kube/kubecfg.crt --client-key=/usr/local/kube/kubecfg.key
+#kubectl config set-context k8sadmincontext --cluster=k8scluster --user=cluster-admin
+#kubectl config use-context k8sadmincontext
 
 #function
 
