@@ -24,6 +24,7 @@ Deploy to nginx lb use annotations:
     - NodePort, It need setting nodeport like '{ "port": 5000, "nodePort": 30001}'
 
 ```
+
 export DOCKER_APP_NAME='order-grab-service'
 export PUSH_TAG='prd'
 export KUBE_APP=$DOCKER_APP_NAME
@@ -40,7 +41,9 @@ export KUBE_SVC_ANNOTATIONS='{"nginx.gateway.type": "api"}'
 #export KUBE_SVC_ANNOTATIONS='{"nginx.gateway.type": "website","nginx.gateway.domain":"mydomain"}'
 #export KUBE_SVC_ANNOTATIONS='{"nginx.gateway.type": "wxqy-website","nginx.gateway.domain":"mydomain"}'
 
-docker run --rm -t siriuszg/k8s-kubectl:TAG "${KUBE_APP}" "${KUBE_NAMESPACE}" \
+docker run --rm -t -e KUBECONFIG="/usr/local/kube/deploy.conf" \
+-v /host/path/kubeconfig:/usr/local/kube/deploy.conf \
+siriuszg/k8s-kubectl:TAG "${KUBE_APP}" "${KUBE_NAMESPACE}" \
 "${KUBE_REPLICAS}" "${KUBE_IMAGE}" \
 "${KUBE_RESOURCES}" "${KUBE_ENVIRONMENT}" \
 "${KUBE_PORTS}" "${KUBE_SERVICE_TYPE}" \
@@ -71,7 +74,9 @@ export JOB_ENVIRONMENT='{"name": "ASPNETCORE_ENVIRONMENT","value": "staging"},{"
 export JOB_ARGS='["echo","hello,world!"]'
 export KUBE_API="https://127.0.0.1"
 
-docker run --rm -t siriuszg/k8s-kubectl:v1.6.7-job-alpha "${JOB_NAME}" "${JOB_NAMESPACE}" \
+docker run --rm -t -e KUBECONFIG="/usr/local/kube/deploy.conf" \
+-v /host/path/kubeconfig:/usr/local/kube/deploy.conf \
+"${JOB_NAME}" "${JOB_NAMESPACE}" \
 "${JOB_SCHEDULE}" "${JOB_POLICY}" \
 "${JOB_IMAGE}" "${JOB_RESOURCES}" \
 "${JOB_ENVIRONMENT}" "${JOB_ARGS}" \
