@@ -76,7 +76,7 @@ export KUBE_API="https://127.0.0.1"
 
 docker run --rm -t -e KUBECONFIG="/usr/local/kube/deploy.conf" \
 -v /host/path/kubeconfig:/usr/local/kube/deploy.conf \
-"${JOB_NAME}" "${JOB_NAMESPACE}" \
+siriuszg/k8s-kubectl:TAG "${JOB_NAME}" "${JOB_NAMESPACE}" \
 "${JOB_SCHEDULE}" "${JOB_POLICY}" \
 "${JOB_IMAGE}" "${JOB_RESOURCES}" \
 "${JOB_ENVIRONMENT}" "${JOB_ARGS}" \
