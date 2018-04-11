@@ -32,7 +32,8 @@
             "image": "$IMAGE",
             "resources": $RESOURCES,
             "env": [$ENVIRONMENT],
-            "ports": [$PORTS]
+            "ports": [$PORTS],
+            "imagePullPolicy": "Always"
           }
         ]
       }
