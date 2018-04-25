@@ -26,6 +26,7 @@
         }
       },
       "spec": {
+        "imagePullSecrets": [ { "name": "default-secret" } ]
         "containers": [
           {
             "name": "$APP_NAME",
