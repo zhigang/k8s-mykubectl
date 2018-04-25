@@ -18,10 +18,6 @@
     },
     "spec": {
         "rules": [$INGRESS_RULES],
-        "tls": [
-            {
-                "secretName": "$INGRESS_TLS_SECRET"
-            }
-        ]
+        "tls": [$INGRESS_TLS_SECRET]
     }
 }
