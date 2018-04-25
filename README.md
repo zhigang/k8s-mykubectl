@@ -1,29 +1,33 @@
-##### Docker image:
+# Kubectl for quick deploy
+
+## Docker image
 
 Docker image already pushed to docker hub, image name: "siriuszg/k8s-kubectl:TAG".
-```
+
+```bash
 docker pull siriuszg/k8s-kubectl:TAG
 ```
 
-##### Docker tag:
+## Docker tag
 
 * v1.8.10
 * v1.8.10-job
 
-##### How to use:
+## How to use
 
 Deploy to nginx lb use annotations:
-- nginx.gateway.type:
-    - value is api, website, wxqy-website.
-- nginx.gateway.domain:
-    - if nginx.gateway.type is website or wxqy-website have to set this annotation.
-- nginx.gateway.url:
-    - if nginx.gateway.type is api need this annotation, this can be none.
-- KUBE_SERVICE_TYPE:
-    - ClusterIP
-    - NodePort, It need setting nodeport like '{ "port": 5000, "nodePort": 30001}'
 
-```
+* nginx.gateway.type
+  * value is api, website, wxqy-website.
+* nginx.gateway.domain:
+  * if nginx.gateway.type is website or wxqy-website have to set this annotation.
+* nginx.gateway.url:
+  * if nginx.gateway.type is api need this annotation, this can be none.
+* KUBE_SERVICE_TYPE:
+  * ClusterIP
+  * NodePort, It need setting nodeport like '{ "port": 5000, "nodePort": 30001}'
+
+```bash
 
 export DOCKER_APP_NAME='order-grab-service'
 export PUSH_TAG='prd'
@@ -35,11 +39,16 @@ export KUBE_ENVIRONMENT='{"name": "CONFIGOR_ENV","value": "production"}'
 export KUBE_PORTS='{"containerPort": 5000}'
 export KUBE_SERVICE_TYPE='NodePort'
 export KUBE_SERVICE_PORTS='{ "port": 5000, "nodePort": 30001}'
-export KUBE_API="https://127.0.0.1"
 export KUBE_SVC_ANNOTATIONS='{"nginx.gateway.type": "api"}'
 #export KUBE_SVC_ANNOTATIONS='{"nginx.gateway.type": "api","nginx.gateway.url":"test"}'
 #export KUBE_SVC_ANNOTATIONS='{"nginx.gateway.type": "website","nginx.gateway.domain":"mydomain"}'
 #export KUBE_SVC_ANNOTATIONS='{"nginx.gateway.type": "wxqy-website","nginx.gateway.domain":"mydomain"}'
+export KUBE_USE_INGRESS="true"
+export INGRESS_RULES='{                                                                                                             \
+        "host": "domain",                                                                                                           \
+        "http": { "paths": [ { "path": "/order-grab", "backend": { "serviceName": "${KUBE_APP}", "servicePort": 30001 } } ] }       \
+        }'
+export INGRESS_TLS_SECRET='secretName'
 
 docker run --rm -t -e KUBECONFIG="/usr/local/kube/deploy.conf" \
 -v /host/path/kubeconfig:/usr/local/kube/deploy.conf \
@@ -47,12 +56,13 @@ siriuszg/k8s-kubectl:TAG "${KUBE_APP}" "${KUBE_NAMESPACE}" \
 "${KUBE_REPLICAS}" "${KUBE_IMAGE}" \
 "${KUBE_RESOURCES}" "${KUBE_ENVIRONMENT}" \
 "${KUBE_PORTS}" "${KUBE_SERVICE_TYPE}" \
-"${KUBE_SERVICE_PORTS}" "${KUBE_API}" \
-"${KUBE_SVC_ANNOTATIONS}"
+"${KUBE_SERVICE_PORTS}" "${KUBE_USE_INGRESS}" \
+"${KUBE_SVC_ANNOTATIONS}" "${INGRESS_RULES}" "${INGRESS_TLS_SECRET}"
 ```
-##### Use Environment:
 
-```
+## Use Environment
+
+```bash
 export KUBE_ENVIRONMENT="{\"name\": \"ASPNETCORE_ENVIRONMENT\",\"value\": \"staging\"}, \
 {\"name\": \"TEST_ENVIRONMENT\",\"value\": \"test\"}"
 
@@ -61,9 +71,10 @@ OR
 export KUBE_ENVIRONMENT='{"name": "ASPNETCORE_ENVIRONMENT","value": "staging"},{"name": "TEST_ENVIRONMENT","value": "test"}'
 
 ```
-##### How to deploy cron job:
 
-```
+## How to deploy cron job
+
+```bash
 export JOB_NAME='test-job'
 export JOB_NAMESPACE='test'
 export JOB_SCHEDULE='01 *\/1 * * *'
@@ -83,8 +94,8 @@ siriuszg/k8s-kubectl:TAG "${JOB_NAME}" "${JOB_NAMESPACE}" \
 "${KUBE_API}"
 ```
 
-##### Build Docker Iamge:
+## Build Docker Iamge
 
-```
+```bash
 docker build --force-rm=true -t siriuszg/k8s-kubectl:TAG .
 ```
