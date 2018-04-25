@@ -6,7 +6,7 @@ if [[ "$1" == "help" ]]; then
   exit 0;
 fi
 
-if [ $# != 11 ] ; then
+if [ $# != 12 ] ; then
   echo "lost some argments.ex:"
   cat exechelp
   exit 1;
@@ -21,8 +21,10 @@ KUBE_ENVIRONMENT=$6
 KUBE_PORTS=$7
 KUBE_SERVICE_TYPE=$8
 KUBE_SERVICE_PORTS=$9
-KUBE_API=$10
+KUBE_USE_INGRESS=$10
 KUBE_SVC_ANNOTATIONS=$11
+INGRESS_RULES=$12
+INGRESS_TLS_SECRET=$13
 
 #function
 
@@ -39,12 +41,27 @@ create_controller_config()
   echo
 }
 
-# deploy
+create_service_config()
+{
+  sed -e "s/\\\$APP_NAME/${KUBE_APP}/g;s/\\\$NAMESPACE/${KUBE_NAMESPACE}/g;s/\\\$SERVICE_TYPE/${KUBE_SERVICE_TYPE}/g;s/\\\$SERVICE_PORTS/${KUBE_SERVICE_PORTS}/g;s/\\\$ANNOTATIONS/${KUBE_SVC_ANNOTATIONS}/g;" \
+  "./service.json.sed" > ./service.json
 
-# if ! kubectl get namespace | grep "${KUBE_NAMESPACE}" &> /dev/null; then
-#   echo "Create namespace ${KUBE_NAMESPACE}."
-#   kubectl create namespace $KUBE_NAMESPACE
-# fi
+  echo
+  cat service.json
+  echo
+}
+
+create_ingress_config()
+{
+  sed -e "s/\\\$APP_NAME/${KUBE_APP}/g;s/\\\$NAMESPACE/${KUBE_NAMESPACE}/g;s/\\\$INGRESS_RULES/${INGRESS_RULES}/g;s/\\\$INGRESS_TLS_SECRET/${INGRESS_TLS_SECRET}/g;" \
+  "./ingress.json.sed" > ./ingress.json
+
+  echo
+  cat ingress.json
+  echo
+}
+
+# deploy
 
 create_controller_config
 
@@ -60,18 +77,27 @@ if [ "${KUBE_SERVICE_TYPE}" = "" ]; then
   exit 0;
 fi
 
-sed -e "s/\\\$APP_NAME/${KUBE_APP}/g;s/\\\$NAMESPACE/${KUBE_NAMESPACE}/g;s/\\\$SERVICE_TYPE/${KUBE_SERVICE_TYPE}/g;s/\\\$SERVICE_PORTS/${KUBE_SERVICE_PORTS}/g;s/\\\$ANNOTATIONS/${KUBE_SVC_ANNOTATIONS}/g;" \
-  "./service.json.sed" > ./service.json
-
-echo
-cat service.json
-echo
+create_service_config
 
 if [ -f ./service.json ]; then
   echo "Service ${KUBE_NAMESPACE}.${KUBE_APP}, Apply a configuration to a resource."
   kubectl apply -f ./service.json
 else
     echo "Lost service.json."
+fi
+
+if [ "${KUBE_USE_INGRESS}" = "true" ]; then
+  create_ingress_config
+
+  if [ -f ./ingress.json ]; then
+    echo "Ingress ${KUBE_NAMESPACE}.${KUBE_APP}, Apply a configuration to a resource."
+    kubectl apply -f ./ingress.json
+  else
+      echo "Lost ingress.json."
+  fi
+else
+  echo "Don't need deployment ingress ${KUBE_NAMESPACE}.${KUBE_APP} ."
+  exit 0;
 fi
 
 exit 0;

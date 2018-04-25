@@ -1,6 +1,6 @@
 FROM lachlanevenson/k8s-kubectl:v1.8.10
 
-MAINTAINER siriuszg <zhigang52110@sina.com>
+LABEL maintainer="siriuszg <zhigang52110@sina.com>"
 
 RUN mkdir -p /usr/local/kube
 
