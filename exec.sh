@@ -6,7 +6,7 @@ if [[ "$1" == "help" ]]; then
   exit 0;
 fi
 
-if [ $# != 12 ] ; then
+if [ $# != 13 ] ; then
   echo "lost some argments.ex:"
   cat exechelp
   exit 1;
