@@ -53,6 +53,7 @@ create_service_config()
 
 create_ingress_config()
 {
+  INGRESS_RULES=`echo $INGRESS_RULES | sed 's#\/#\\\/#g'`
   sed -e "s/\\\$APP_NAME/${KUBE_APP}/g;s/\\\$NAMESPACE/${KUBE_NAMESPACE}/g;s/\\\$INGRESS_RULES/${INGRESS_RULES}/g;s/\\\$INGRESS_TLS_SECRET/${INGRESS_TLS_SECRET}/g;" \
   "./ingress.json.sed" > ./ingress.json
 
