@@ -10,6 +10,7 @@ docker pull siriuszg/k8s-kubectl:TAG
 
 ## Docker tag
 
+* v1.8.15
 * v1.8.10
 * v1.8.10-hw
 * v1.8.10-job
@@ -40,16 +41,16 @@ export KUBE_ENVIRONMENT='{"name": "CONFIGOR_ENV","value": "production"}'
 export KUBE_PORTS='{"containerPort": 5000}'
 export KUBE_SERVICE_TYPE='NodePort'
 export KUBE_SERVICE_PORTS='{ "port": 5000, "nodePort": 30001}'
-export KUBE_SVC_ANNOTATIONS='{"nginx.gateway.type": "api"}'
-#export KUBE_SVC_ANNOTATIONS='{"nginx.gateway.type": "api","nginx.gateway.url":"test"}'
-#export KUBE_SVC_ANNOTATIONS='{"nginx.gateway.type": "website","nginx.gateway.domain":"mydomain"}'
-#export KUBE_SVC_ANNOTATIONS='{"nginx.gateway.type": "wxqy-website","nginx.gateway.domain":"mydomain"}'
-export KUBE_USE_INGRESS="true"
-export INGRESS_RULES='{                                                                                                             \
+export KUBE_SERVICE_ANNOTATIONS='{"nginx.gateway.type": "api"}'
+#export KUBE_SERVICE_ANNOTATIONS='{"nginx.gateway.type": "api","nginx.gateway.url":"test"}'
+#export KUBE_SERVICE_ANNOTATIONS='{"nginx.gateway.type": "website","nginx.gateway.domain":"mydomain"}'
+#export KUBE_SERVICE_ANNOTATIONS='{"nginx.gateway.type": "wxqy-website","nginx.gateway.domain":"mydomain"}'
+export KUBE_INGRESS_RULES='{                                                                                                        \
         "host": "domain",                                                                                                           \
         "http": { "paths": [ { "path": "/order-grab", "backend": { "serviceName": "${KUBE_APP}", "servicePort": 30001 } } ] }       \
         }'
-export INGRESS_TLS_SECRET='secretName'
+export KUBE_INGRESS_ANNOTATIONS="kong"
+export KUBE_INGRESS_TLS_SECRET=""
 
 docker run --rm -t -e KUBECONFIG="/usr/local/kube/deploy.conf" \
 -v /host/path/kubeconfig:/usr/local/kube/deploy.conf \
@@ -57,8 +58,9 @@ siriuszg/k8s-kubectl:TAG "${KUBE_APP}" "${KUBE_NAMESPACE}" \
 "${KUBE_REPLICAS}" "${KUBE_IMAGE}" \
 "${KUBE_RESOURCES}" "${KUBE_ENVIRONMENT}" \
 "${KUBE_PORTS}" "${KUBE_SERVICE_TYPE}" \
-"${KUBE_SERVICE_PORTS}" "${KUBE_USE_INGRESS}" \
-"${KUBE_SVC_ANNOTATIONS}" "${INGRESS_RULES}" "${INGRESS_TLS_SECRET}"
+"${KUBE_SERVICE_PORTS}" "${KUBE_SERVICE_ANNOTATIONS}" \
+"${KUBE_INGRESS_RULES}" "${KUBE_INGRESS_ANNOTATIONS}" \
+"${KUBE_INGRESS_TLS_SECRET}"
 ```
 
 ## Use Environment

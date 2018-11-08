@@ -6,34 +6,43 @@ if [[ "$1" == "help" ]]; then
   exit 0;
 fi
 
-if [ $# != 13 ] ; then
-  echo "lost some argments.ex:"
-  cat exechelp
-  exit 1;
-fi
-
-KUBE_APP=$1
-KUBE_NAMESPACE=$2
-KUBE_REPLICAS=$3
-KUBE_IMAGE=$4
-KUBE_RESOURCES=$5
-KUBE_ENVIRONMENT=$6
-KUBE_PORTS=$7
-KUBE_SERVICE_TYPE=$8
-KUBE_SERVICE_PORTS=$9
-KUBE_USE_INGRESS=$10
-KUBE_SVC_ANNOTATIONS=$11
-INGRESS_RULES=$12
+NAME=$1
+NAMESPACE=$2
+REPLICAS=$3
+IMAGE=$4
+RESOURCES=$5
+ENVIRONMENTS=$6
+PORTS=$7
+SERVICE_TYPE=$8
+SERVICE_PORTS=$9
+SERVICE_ANNOTATIONS=$10
+INGRESS_RULES=$11
+INGRESS_ANNOTATIONS=$12
 INGRESS_TLS_SECRET=$13
 
-#function
+# function start
+lost_arg_error()
+{
+  echo "Need some argments. ex:"
+  cat exechelp
+  exit 1;
+}
 
 create_controller_config()
 {
-  KUBE_ENVIRONMENT=`echo $KUBE_ENVIRONMENT | sed 's#\/#\\\/#g'`
-  KUBE_IMAGE_SED=`echo $KUBE_IMAGE | sed 's#\/#\\\/#g'`
+  if [ -z $NAME ] && [ -z $NAMESPACE ] && [ -z $REPLICAS ] && [ -z $IMAGE ] && [ -z $RESOURCES ] && [ -z $PORTS ]; then
+    echo "Cann't create deployment json."
+    lost_arg_error
+  fi
   
-  sed -e "s/\\\$APP_NAME/${KUBE_APP}/g;s/\\\$NAMESPACE/${KUBE_NAMESPACE}/g;s/\\\$REPLICAS/${KUBE_REPLICAS}/g;s/\\\$IMAGE/${KUBE_IMAGE_SED}/g;s/\\\$RESOURCES/${KUBE_RESOURCES}/g;s/\\\$ENVIRONMENT/${KUBE_ENVIRONMENT}/g;s/\\\$PORTS/${KUBE_PORTS}/g;" \
+  if [ -z $PORTS ]; then
+    PORTS = "{}"
+  fi
+
+  ENVIRONMENTS=`echo $ENVIRONMENTS | sed 's#\/#\\\/#g'`
+  IMAGE=`echo $IMAGE | sed 's#\/#\\\/#g'`
+  
+  sed -e "s/\\\$APP_NAME/${NAME}/g;s/\\\$NAMESPACE/${NAMESPACE}/g;s/\\\$REPLICAS/${REPLICAS}/g;s/\\\$IMAGE/${IMAGE}/g;s/\\\$RESOURCES/${RESOURCES}/g;s/\\\$ENVIRONMENT/${ENVIRONMENTS}/g;s/\\\$PORTS/${PORTS}/g;" \
   "controller.json.sed" > controller.json
   
   echo
@@ -43,7 +52,18 @@ create_controller_config()
 
 create_service_config()
 {
-  sed -e "s/\\\$APP_NAME/${KUBE_APP}/g;s/\\\$NAMESPACE/${KUBE_NAMESPACE}/g;s/\\\$SERVICE_TYPE/${KUBE_SERVICE_TYPE}/g;s/\\\$SERVICE_PORTS/${KUBE_SERVICE_PORTS}/g;s/\\\$ANNOTATIONS/${KUBE_SVC_ANNOTATIONS}/g;" \
+  if [ -z $NAME ] && [ -z $NAMESPACE ] && [ -z $SERVICE_TYPE ] && [ -z $SERVICE_PORTS ]; then
+    echo "Cann't create service json."
+    lost_arg_error
+  fi
+
+  if [ -z $SERVICE_ANNOTATIONS ]; then
+    SERVICE_ANNOTATIONS="{}"
+  fi
+
+  SERVICE_ANNOTATIONS=`echo $SERVICE_ANNOTATIONS | sed 's#\/#\\\/#g'`
+  
+  sed -e "s/\\\$APP_NAME/${NAME}/g;s/\\\$NAMESPACE/${NAMESPACE}/g;s/\\\$SERVICE_TYPE/${SERVICE_TYPE}/g;s/\\\$SERVICE_PORTS/${SERVICE_PORTS}/g;s/\\\$ANNOTATIONS/${SERVICE_ANNOTATIONS}/g;" \
   "./service.json.sed" > ./service.json
 
   echo
@@ -53,8 +73,27 @@ create_service_config()
 
 create_ingress_config()
 {
+  if [ -z $NAME ] && [ -z $NAMESPACE ] && [ -z $INGRESS_RULES ]; then
+    echo "Cann't create ingress json."
+    lost_arg_error
+  fi
+
+  if [ -z $INGRESS_TLS_SECRET ]; then
+    INGRESS_TLS_SECRET="{}"
+  fi
+
+  if [ -z $INGRESS_ANNOTATIONS ]; then
+    INGRESS_ANNOTATIONS="{}"
+  elif [ "${INGRESS_ANNOTATIONS}" = "nginx" ]; then
+    INGRESS_ANNOTATIONS='{ "ingress.kubernetes.io/add-base-url": "false", "ingress.kubernetes.io/rewrite-target": "/", "ingress.kubernetes.io/secure-backends": "false", "ingress.beta.kubernetes.io/role": "data" }'
+  elif [ "${INGRESS_ANNOTATIONS}" = "kong" ]; then
+    INGRESS_ANNOTATIONS='{ "kubernetes.io/ingress.class": "kong", "configuration.konghq.com": "need-strip-path" }'
+  fi
+
   INGRESS_RULES=`echo $INGRESS_RULES | sed 's#\/#\\\/#g'`
-  sed -e "s/\\\$APP_NAME/${KUBE_APP}/g;s/\\\$NAMESPACE/${KUBE_NAMESPACE}/g;s/\\\$INGRESS_RULES/${INGRESS_RULES}/g;s/\\\$INGRESS_TLS_SECRET/${INGRESS_TLS_SECRET}/g;" \
+  INGRESS_ANNOTATIONS=`echo $INGRESS_ANNOTATIONS | sed 's#\/#\\\/#g'`
+
+  sed -e "s/\\\$APP_NAME/${NAME}/g;s/\\\$NAMESPACE/${NAMESPACE}/g;s/\\\$INGRESS_RULES/${INGRESS_RULES}/g;s/\\\$INGRESS_TLS_SECRET/${INGRESS_TLS_SECRET}/g;s/\\\$ANNOTATIONS/${INGRESS_ANNOTATIONS}/g;" \
   "./ingress.json.sed" > ./ingress.json
 
   echo
@@ -62,49 +101,50 @@ create_ingress_config()
   echo
 }
 
-# deploy
+# function end
 
+# 1. Apply a deployment
 create_controller_config
 
 if [ -f controller.json ]; then
-  echo "Deployment ${KUBE_NAMESPACE}.${KUBE_APP}, Apply a configuration to a resource."
+  echo "Deployment ${NAMESPACE}.${NAME}, Apply a configuration to a resource."
   kubectl apply -f ./controller.json
 else
   echo "Lost controller.json."
 fi
 
-if [ "${KUBE_SERVICE_TYPE}" = "" ]; then
-  echo "Don't need deployment service ${KUBE_NAMESPACE}.${KUBE_APP} ."
+# 2. Apply a service
+if [ "${SERVICE_TYPE}" = "" ]; then
+  echo "Service type is null. Don't need deployment service ${NAMESPACE}.${NAME} ."
   exit 0;
 fi
 
 create_service_config
 
 if [ -f ./service.json ]; then
-  echo "Service ${KUBE_NAMESPACE}.${KUBE_APP}, Apply a configuration to a resource."
+  echo "Service ${NAMESPACE}.${NAME}, Apply a configuration to a resource."
   kubectl apply -f ./service.json
 else
     echo "Lost service.json."
 fi
 
-if kubectl get ing --namespace=$KUBE_NAMESPACE | grep $KUBE_APP &> /dev/null; then
-  echo "Ingress ${KUBE_NAMESPACE}.${KUBE_APP} already exists. Don't need deployment."
+# 3. Apply a ingress
+if [ "${INGRESS_RULES}" = "" ]; then
+  echo "Ingress rules is null. Don't need deployment ingress ${NAMESPACE}.${NAME} ."
   exit 0;
 fi
 
-if [ "${KUBE_USE_INGRESS}" = "true" ]; then
+if kubectl get ing --namespace=$NAMESPACE | grep $NAME &> /dev/null; then
+  echo "Ingress ${NAMESPACE}.${NAME} already exists. Don't need deployment."
+else
   create_ingress_config
-
+  
   if [ -f ./ingress.json ]; then
-    echo "Ingress ${KUBE_NAMESPACE}.${KUBE_APP}, Apply a configuration to a resource."
+    echo "Ingress ${NAMESPACE}.${NAME}, Apply a configuration to a resource."
     kubectl apply -f ./ingress.json
   else
       echo "Lost ingress.json."
   fi
-else
-  echo "Don't need deployment ingress ${KUBE_NAMESPACE}.${KUBE_APP} ."
-  exit 0;
 fi
 
 exit 0;
-

@@ -9,12 +9,7 @@
             "zone": "data",
             "isExternal": "true"
         },
-        "annotations": {
-            "ingress.kubernetes.io/add-base-url": "false",
-            "ingress.kubernetes.io/rewrite-target": "/",
-            "ingress.kubernetes.io/secure-backends": "false",
-            "ingress.beta.kubernetes.io/role": "data"
-        }
+        "annotations": $ANNOTATIONS
     },
     "spec": {
         "rules": [$INGRESS_RULES],
