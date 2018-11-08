@@ -87,6 +87,11 @@ else
     echo "Lost service.json."
 fi
 
+if kubectl get ing --namespace=$KUBE_NAMESPACE | grep $KUBE_APP &> /dev/null; then
+  echo "Ingress ${KUBE_NAMESPACE}.${KUBE_APP} already exists. Don't need deployment."
+  exit 0;
+fi
+
 if [ "${KUBE_USE_INGRESS}" = "true" ]; then
   create_ingress_config
 
