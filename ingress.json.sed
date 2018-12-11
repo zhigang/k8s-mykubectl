@@ -5,9 +5,7 @@
         "name": "$APP_NAME",
         "namespace": "$NAMESPACE",
         "labels": {
-            "app": "$APP_NAME",
-            "zone": "data",
-            "isExternal": "true"
+            "app": "$APP_NAME"
         },
         "annotations": $ANNOTATIONS
     },

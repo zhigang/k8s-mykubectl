@@ -78,10 +78,6 @@ create_ingress_config()
     lost_arg_error
   fi
 
-  if [ -z $INGRESS_TLS_SECRET ]; then
-    INGRESS_TLS_SECRET="{}"
-  fi
-
   if [ -z $INGRESS_ANNOTATIONS ]; then
     INGRESS_ANNOTATIONS="{}"
   elif [ "${INGRESS_ANNOTATIONS}" = "nginx" ]; then
