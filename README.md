@@ -11,24 +11,38 @@ docker pull siriuszg/k8s-kubectl:TAG
 ## Docker tag
 
 * v1.8.15
+* v1.8.15-job
 * v1.8.15-hw
 * v1.8.10
 * v1.8.10-hw
 * v1.8.10-job
 
-## How to use
+## Use nginx lb annotations
 
-Deploy to nginx lb use annotations:
+* Annotations setting:
+  * nginx.gateway.type
+    * value is api, website, wxqy-website.
+  * nginx.gateway.domain:
+    * if nginx.gateway.type is website or wxqy-website have to set this annotation.
+  * nginx.gateway.url:
+    * if nginx.gateway.type is api need this annotation, this can be none.
+  * KUBE_SERVICE_TYPE:
+    * ClusterIP
+    * NodePort, It need setting nodeport like '{ "port": 5000, "nodePort": 30001}'
 
-* nginx.gateway.type
-  * value is api, website, wxqy-website.
-* nginx.gateway.domain:
-  * if nginx.gateway.type is website or wxqy-website have to set this annotation.
-* nginx.gateway.url:
-  * if nginx.gateway.type is api need this annotation, this can be none.
-* KUBE_SERVICE_TYPE:
-  * ClusterIP
-  * NodePort, It need setting nodeport like '{ "port": 5000, "nodePort": 30001}'
+## Use environment
+
+```bash
+export KUBE_ENVIRONMENT="{\"name\": \"ASPNETCORE_ENVIRONMENT\",\"value\": \"staging\"}, \
+{\"name\": \"TEST_ENVIRONMENT\",\"value\": \"test\"}"
+
+OR
+
+export KUBE_ENVIRONMENT='{"name": "ASPNETCORE_ENVIRONMENT","value": "staging"},{"name": "TEST_ENVIRONMENT","value": "test"}'
+
+```
+
+## How to deploy application
 
 ```bash
 
@@ -64,18 +78,6 @@ siriuszg/k8s-kubectl:TAG "${KUBE_APP}" "${KUBE_NAMESPACE}" \
 "${KUBE_INGRESS_TLS_SECRET}"
 ```
 
-## Use Environment
-
-```bash
-export KUBE_ENVIRONMENT="{\"name\": \"ASPNETCORE_ENVIRONMENT\",\"value\": \"staging\"}, \
-{\"name\": \"TEST_ENVIRONMENT\",\"value\": \"test\"}"
-
-OR
-
-export KUBE_ENVIRONMENT='{"name": "ASPNETCORE_ENVIRONMENT","value": "staging"},{"name": "TEST_ENVIRONMENT","value": "test"}'
-
-```
-
 ## How to deploy cron job
 
 ```bash
@@ -96,10 +98,4 @@ siriuszg/k8s-kubectl:TAG "${JOB_NAME}" "${JOB_NAMESPACE}" \
 "${JOB_IMAGE}" "${JOB_RESOURCES}" \
 "${JOB_ENVIRONMENT}" "${JOB_ARGS}" \
 "${KUBE_API}"
-```
-
-## Build Docker Iamge
-
-```bash
-docker build --force-rm=true -t siriuszg/k8s-kubectl:TAG .
 ```

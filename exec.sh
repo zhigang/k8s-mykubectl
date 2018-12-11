@@ -59,9 +59,9 @@ create_service_config()
 
   if [ -z $SERVICE_ANNOTATIONS ]; then
     SERVICE_ANNOTATIONS="{}"
+  else
+    SERVICE_ANNOTATIONS=`echo $SERVICE_ANNOTATIONS | sed 's#\/#\\\/#g'`
   fi
-
-  SERVICE_ANNOTATIONS=`echo $SERVICE_ANNOTATIONS | sed 's#\/#\\\/#g'`
   
   sed -e "s/\\\$APP_NAME/${NAME}/g;s/\\\$NAMESPACE/${NAMESPACE}/g;s/\\\$SERVICE_TYPE/${SERVICE_TYPE}/g;s/\\\$SERVICE_PORTS/${SERVICE_PORTS}/g;s/\\\$ANNOTATIONS/${SERVICE_ANNOTATIONS}/g;" \
   "./service.json.sed" > ./service.json

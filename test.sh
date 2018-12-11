@@ -16,15 +16,15 @@ export KUBE_SERVICE_TYPE='NodePort'
 export KUBE_SERVICE_PORTS='{ "port": 80, "nodePort": 30080 }'
 export KUBE_SERVICE_ANNOTATIONS=""
 export KUBE_INGRESS_RULES='{ \
-        "host":"qa.pangpangcloud.com", \
+        "host":"domain.com", \
         "http":{ \
             "paths":[ \
-                {"path":"/emall-portal-api","backend":{"serviceName":"nginx-example","servicePort":80}} \
+                {"path":"/nginx-example","backend":{"serviceName":"nginx-example","servicePort":80}} \
             ]} \
         }'
 export KUBE_INGRESS_ANNOTATIONS="kong"
 export KUBE_INGRESS_TLS_SECRET=""
-#1.11.6-alpine 1.10.2-alpine
+
 export KUBE_IMAGE="nginx:1.11.6-alpine"
 
 docker run --rm -t siriuszg/k8s-kubectl:v1.8.15-hw "${KUBE_APP}" "${KUBE_NAMESPACE}" \
