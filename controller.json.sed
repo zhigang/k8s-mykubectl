@@ -26,7 +26,6 @@
         }
       },
       "spec": {
-        "imagePullSecrets": [ { "name": "default-secret" } ],
         "nodeSelector": { "app-ready": "true" },
         "containers": [
           {
