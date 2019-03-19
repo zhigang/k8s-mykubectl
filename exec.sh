@@ -36,7 +36,7 @@ create_controller_config()
   fi
   
   if [ -z $PORTS ]; then
-    PORTS = "{}"
+    sed -i "/ports/d" "controller.json.sed"
   fi
 
   ENVIRONMENTS=`echo $ENVIRONMENTS | sed 's#\/#\\\/#g'`
