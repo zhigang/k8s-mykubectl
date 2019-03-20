@@ -6,7 +6,7 @@ if [[ "$1" == "help" ]]; then
   exit 0;
 fi
 
-if [ $# != 9 ] ; then
+if [ $# != 8 ] ; then
   echo "lost some argments.ex:"
   cat exechelp
   exit 1;
@@ -20,7 +20,6 @@ JOB_IMAGE=$5
 JOB_RESOURCES=$6
 JOB_ENVIRONMENT=$7
 JOB_ARGS=$8
-KUBE_API=$9
 
 #function
 
