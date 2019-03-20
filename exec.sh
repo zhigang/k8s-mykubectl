@@ -130,7 +130,7 @@ if [ "${INGRESS_RULES}" = "" ]; then
   exit 0;
 fi
 
-if kubectl get ing --namespace=$NAMESPACE | grep $NAME &> /dev/null; then
+if kubectl get ing $NAME -n=$NAMESPACE --ignore-not-found &> /dev/null; then
   echo "Ingress ${NAMESPACE}.${NAME} already exists. Don't need deployment."
 else
   create_ingress_config
