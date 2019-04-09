@@ -4,10 +4,10 @@
   "metadata": {
     "name": "$APP_NAME",
     "namespace": "$NAMESPACE",
+    "annotations": $ANNOTATIONS,
     "labels": {
       "app": "$APP_NAME"
-    },
-    "annotations": $ANNOTATIONS
+    }
   },
   "spec": {
     "type": "$SERVICE_TYPE",

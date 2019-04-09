@@ -19,6 +19,7 @@ SERVICE_ANNOTATIONS=$10
 INGRESS_RULES=$11
 INGRESS_ANNOTATIONS=$12
 INGRESS_TLS_SECRET=$13
+IMAGE_PULL_SECRETS=$14
 
 # function start
 lost_arg_error()
@@ -38,11 +39,20 @@ create_controller_config()
   if [ -z $PORTS ]; then
     sed -i "/ports/d" "controller.json.sed"
   fi
+  
+  if [ -z $IMAGE_PULL_SECRETS ]; then
+    sed -i "/imagePullSecrets/d" "controller.json.sed"
+  fi
 
-  ENVIRONMENTS=`echo $ENVIRONMENTS | sed 's#\/#\\\/#g'`
+  if [ -z $ENVIRONMENTS ]; then
+    sed -i "/env/d" "controller.json.sed"
+  else
+    ENVIRONMENTS=`echo $ENVIRONMENTS | sed 's#\/#\\\/#g'`
+  fi
+
   IMAGE=`echo $IMAGE | sed 's#\/#\\\/#g'`
   
-  sed -e "s/\\\$APP_NAME/${NAME}/g;s/\\\$NAMESPACE/${NAMESPACE}/g;s/\\\$REPLICAS/${REPLICAS}/g;s/\\\$IMAGE/${IMAGE}/g;s/\\\$RESOURCES/${RESOURCES}/g;s/\\\$ENVIRONMENT/${ENVIRONMENTS}/g;s/\\\$PORTS/${PORTS}/g;" \
+  sed -e "s/\\\$APP_NAME/${NAME}/g;s/\\\$NAMESPACE/${NAMESPACE}/g;s/\\\$REPLICAS/${REPLICAS}/g;s/\\\$IMAGE_PULL_SECRETS/${IMAGE_PULL_SECRETS}/g;s/\\\$IMAGE/${IMAGE}/g;s/\\\$RESOURCES/${RESOURCES}/g;s/\\\$ENVIRONMENT/${ENVIRONMENTS}/g;s/\\\$PORTS/${PORTS}/g;" \
   "controller.json.sed" > controller.json
   
   echo
@@ -58,7 +68,7 @@ create_service_config()
   fi
 
   if [ -z $SERVICE_ANNOTATIONS ]; then
-    SERVICE_ANNOTATIONS="{}"
+    sed -i "/annotations/d" "service.json.sed"
   else
     SERVICE_ANNOTATIONS=`echo $SERVICE_ANNOTATIONS | sed 's#\/#\\\/#g'`
   fi
@@ -78,8 +88,12 @@ create_ingress_config()
     lost_arg_error
   fi
 
+  if [ -z $INGRESS_TLS_SECRET ]; then
+    sed -i "/tls/d" "ingress.json.sed"
+  fi
+
   if [ -z $INGRESS_ANNOTATIONS ]; then
-    INGRESS_ANNOTATIONS="{}"
+    sed -i "/annotations/d" "ingress.json.sed"
   elif [ "${INGRESS_ANNOTATIONS}" = "hw" ]; then
     INGRESS_ANNOTATIONS='{ "ingress.kubernetes.io/add-base-url": "false", "ingress.kubernetes.io/rewrite-target": "/", "ingress.kubernetes.io/secure-backends": "false", "ingress.beta.kubernetes.io/role": "data" }'
   elif [ "${INGRESS_ANNOTATIONS}" = "nginx" ]; then

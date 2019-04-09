@@ -4,13 +4,13 @@
     "metadata": {
         "name": "$APP_NAME",
         "namespace": "$NAMESPACE",
+        "annotations": $ANNOTATIONS,
         "labels": {
             "app": "$APP_NAME"
-        },
-        "annotations": $ANNOTATIONS
+        }
     },
     "spec": {
-        "rules": [$INGRESS_RULES],
-        "tls": [$INGRESS_TLS_SECRET]
+        "tls": [$INGRESS_TLS_SECRET],
+        "rules": [$INGRESS_RULES]
     }
 }

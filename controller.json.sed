@@ -26,6 +26,7 @@
         }
       },
       "spec": {
+        "imagePullSecrets": [$IMAGE_PULL_SECRETS],
         "nodeSelector": { "app-ready": "true" },
         "containers": [
           {

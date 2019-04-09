@@ -17,14 +17,15 @@
             "spec": {
                 "template": {
                     "spec": {
+                        "imagePullSecrets": [$IMAGE_PULL_SECRETS],
                         "containers": [
                             {
                                 "name": "$JOB_NAME",
                                 "image": "$IMAGE",
-                                "imagePullPolicy": "Always",
                                 "resources": $RESOURCES,
                                 "env": [$ENVIRONMENT],
-                                "args": $ARGS
+                                "args": $ARGS,
+                                "imagePullPolicy": "Always"
                             }
                         ],
                         "restartPolicy": "OnFailure"
