@@ -28,13 +28,16 @@
       "spec": {
         "imagePullSecrets": [$IMAGE_PULL_SECRETS],
         "nodeSelector": { "app-ready": "true" },
+        "terminationGracePeriodSeconds": 60,
         "containers": [
           {
             "name": "$APP_NAME",
             "image": "$IMAGE",
             "resources": $RESOURCES,
             "env": [$ENVIRONMENT],
-            "ports": [$PORTS],
+            "ports": $PORTS,
+            "readinessProbe": $READINESSPROBE,
+            "livenessProbe": $LIVENESSPROBE,
             "imagePullPolicy": "Always"
           }
         ]

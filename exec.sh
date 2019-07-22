@@ -37,7 +37,14 @@ create_controller_config()
   fi
   
   if [ -z $PORTS ]; then
-    sed -i "/ports/d" "controller.json.sed"
+    sed -i "/ports/d"          "controller.json.sed"
+    sed -i "/readinessProbe/d" "controller.json.sed"
+    sed -i "/livenessProbe/d"  "controller.json.sed"
+  else
+    PORTS="[${PORTS}]"
+    READINESS_PORT=`echo $PORTS | jq ".[0].containerPort"`
+    READINESSPROBE='{"tcpSocket":{"port":'${READINESS_PORT}'},"initialDelaySeconds":5,"periodSeconds":10,"successThreshold":1,"failureThreshold":5}'
+    LIVENESSPROBE=$READINESSPROBE
   fi
   
   if [ -z $IMAGE_PULL_SECRETS ]; then
@@ -52,12 +59,8 @@ create_controller_config()
 
   IMAGE=`echo $IMAGE | sed 's#\/#\\\/#g'`
   
-  sed -e "s/\\\$APP_NAME/${NAME}/g;s/\\\$NAMESPACE/${NAMESPACE}/g;s/\\\$REPLICAS/${REPLICAS}/g;s/\\\$IMAGE_PULL_SECRETS/${IMAGE_PULL_SECRETS}/g;s/\\\$IMAGE/${IMAGE}/g;s/\\\$RESOURCES/${RESOURCES}/g;s/\\\$ENVIRONMENT/${ENVIRONMENTS}/g;s/\\\$PORTS/${PORTS}/g;" \
+  sed -e "s/\\\$APP_NAME/${NAME}/g;s/\\\$NAMESPACE/${NAMESPACE}/g;s/\\\$REPLICAS/${REPLICAS}/g;s/\\\$IMAGE_PULL_SECRETS/${IMAGE_PULL_SECRETS}/g;s/\\\$IMAGE/${IMAGE}/g;s/\\\$RESOURCES/${RESOURCES}/g;s/\\\$ENVIRONMENT/${ENVIRONMENTS}/g;s/\\\$PORTS/${PORTS}/g;s/\\\$READINESSPROBE/${READINESSPROBE}/g;s/\\\$LIVENESSPROBE/${LIVENESSPROBE}/g;" \
   "controller.json.sed" > controller.json
-  
-  echo
-  cat controller.json
-  echo
 }
 
 create_service_config()
@@ -75,10 +78,6 @@ create_service_config()
   
   sed -e "s/\\\$APP_NAME/${NAME}/g;s/\\\$NAMESPACE/${NAMESPACE}/g;s/\\\$SERVICE_TYPE/${SERVICE_TYPE}/g;s/\\\$SERVICE_PORTS/${SERVICE_PORTS}/g;s/\\\$ANNOTATIONS/${SERVICE_ANNOTATIONS}/g;" \
   "./service.json.sed" > ./service.json
-
-  echo
-  cat service.json
-  echo
 }
 
 create_ingress_config()
@@ -107,10 +106,6 @@ create_ingress_config()
 
   sed -e "s/\\\$APP_NAME/${NAME}/g;s/\\\$NAMESPACE/${NAMESPACE}/g;s/\\\$INGRESS_RULES/${INGRESS_RULES}/g;s/\\\$INGRESS_TLS_SECRET/${INGRESS_TLS_SECRET}/g;s/\\\$ANNOTATIONS/${INGRESS_ANNOTATIONS}/g;" \
   "./ingress.json.sed" > ./ingress.json
-
-  echo
-  cat ingress.json
-  echo
 }
 
 # function end
@@ -120,6 +115,9 @@ create_controller_config
 
 if [ -f controller.json ]; then
   echo "Deployment ${NAMESPACE}.${NAME}, Apply a configuration to a resource."
+  echo
+  cat controller.json
+  echo
   kubectl apply -f ./controller.json
 else
   echo "Lost controller.json."
@@ -127,7 +125,7 @@ fi
 
 # 2. Apply a service
 if [ "${SERVICE_TYPE}" = "" ]; then
-  echo "Service type is null. Don't need deployment service ${NAMESPACE}.${NAME} ."
+  echo "Service type is empty. Don't need deployment service ${NAMESPACE}.${NAME} ."
   exit 0;
 fi
 
@@ -135,6 +133,9 @@ create_service_config
 
 if [ -f ./service.json ]; then
   echo "Service ${NAMESPACE}.${NAME}, Apply a configuration to a resource."
+  echo
+  cat service.json
+  echo
   kubectl apply -f ./service.json
 else
     echo "Lost service.json."
@@ -142,7 +143,7 @@ fi
 
 # 3. Apply a ingress
 if [ "${INGRESS_RULES}" = "" ]; then
-  echo "Ingress rules is null. Don't need deployment ingress ${NAMESPACE}.${NAME} ."
+  echo "Ingress rules is empty. Don't need deployment ingress ${NAMESPACE}.${NAME} ."
   exit 0;
 fi
 
@@ -153,6 +154,9 @@ else
   
   if [ -f ./ingress.json ]; then
     echo "Ingress ${NAMESPACE}.${NAME}, Apply a configuration to a resource."
+    echo
+    cat ingress.json
+    echo
     kubectl apply -f ./ingress.json
   else
       echo "Lost ingress.json."

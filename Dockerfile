@@ -2,6 +2,10 @@ FROM lachlanevenson/k8s-kubectl:v1.10.13
 
 LABEL maintainer="siriuszg <zhigang52110@sina.com>"
 
+RUN mkdir -p /usr/local/kube \
+    && apk update --no-cache \
+    && apk add --no-cache jq
+
 RUN mkdir -p /usr/local/kube
 
 WORKDIR /usr/local/kube
