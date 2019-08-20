@@ -3,7 +3,8 @@ set -e
 
 export JOB_NAME='test-job'
 export JOB_NAMESPACE='test'
-export JOB_SCHEDULE='01 *\/1 * * *'
+export JOB_SCHEDULE='01 *\/1 * * *' # create a cornjob
+# export JOB_SCHEDULE='job' # create a job
 export JOB_POLICY='Forbid'
 export JOB_IMAGE='busybox'
 export JOB_RESOURCES='{"limits": {"cpu": "150m","memory": "256Mi" }, "requests": {"cpu": "50m","memory": "128Mi" }}'
