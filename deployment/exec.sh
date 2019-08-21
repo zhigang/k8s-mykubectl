@@ -31,33 +31,33 @@ lost_arg_error()
 
 create_controller_config()
 {
-  if [ -z $NAME ] && [ -z $NAMESPACE ] && [ -z $REPLICAS ] && [ -z $IMAGE ] && [ -z $RESOURCES ] && [ -z $PORTS ]; then
+  if [ -z "${NAME}" ] && [ -z "${NAMESPACE}" ] && [ -z "${REPLICAS}" ] && [ -z "${IMAGE}" ] && [ -z "${RESOURCES}" ] && [ -z "${PORTS}" ]; then
     echo "Cann't create deployment json."
     lost_arg_error
   fi
   
-  if [ -z $PORTS ]; then
+  if [ -z "${PORTS}" ]; then
     sed -i "/ports/d"          "controller.json.sed"
     sed -i "/readinessProbe/d" "controller.json.sed"
     sed -i "/livenessProbe/d"  "controller.json.sed"
   else
     PORTS="[${PORTS}]"
-    READINESS_PORT=`echo $PORTS | jq ".[0].containerPort"`
+    READINESS_PORT=`echo ${PORTS} | jq ".[0].containerPort"`
     READINESSPROBE='{"tcpSocket":{"port":'${READINESS_PORT}'},"initialDelaySeconds":5,"timeoutSeconds":5,"periodSeconds":20,"successThreshold":1,"failureThreshold":5}'
     LIVENESSPROBE=$READINESSPROBE
   fi
   
-  if [ -z $IMAGE_PULL_SECRETS ]; then
+  if [ -z "${IMAGE_PULL_SECRETS}" ]; then
     sed -i "/imagePullSecrets/d" "controller.json.sed"
   fi
 
-  if [ -z $ENVIRONMENTS ]; then
+  if [ -z "${ENVIRONMENTS}" ]; then
     sed -i "/env/d" "controller.json.sed"
   else
-    ENVIRONMENTS=`echo $ENVIRONMENTS | sed 's#\/#\\\/#g'`
+    ENVIRONMENTS=`echo ${ENVIRONMENTS} | sed 's#\/#\\\/#g'`
   fi
 
-  IMAGE=`echo $IMAGE | sed 's#\/#\\\/#g'`
+  IMAGE=`echo ${IMAGE} | sed 's#\/#\\\/#g'`
   
   sed -e "s/\\\$APP_NAME/${NAME}/g;s/\\\$NAMESPACE/${NAMESPACE}/g;s/\\\$REPLICAS/${REPLICAS}/g;s/\\\$IMAGE_PULL_SECRETS/${IMAGE_PULL_SECRETS}/g;s/\\\$IMAGE/${IMAGE}/g;s/\\\$RESOURCES/${RESOURCES}/g;s/\\\$ENVIRONMENT/${ENVIRONMENTS}/g;s/\\\$PORTS/${PORTS}/g;s/\\\$READINESSPROBE/${READINESSPROBE}/g;s/\\\$LIVENESSPROBE/${LIVENESSPROBE}/g;" \
   "controller.json.sed" > controller.json
@@ -65,15 +65,15 @@ create_controller_config()
 
 create_service_config()
 {
-  if [ -z $NAME ] && [ -z $NAMESPACE ] && [ -z $SERVICE_TYPE ] && [ -z $SERVICE_PORTS ]; then
+  if [ -z "${NAME}" ] && [ -z "${NAMESPACE}" ] && [ -z "${SERVICE_TYPE}" ] && [ -z "${SERVICE_PORTS}" ]; then
     echo "Cann't create service json."
     lost_arg_error
   fi
 
-  if [ -z $SERVICE_ANNOTATIONS ]; then
+  if [ -z "${SERVICE_ANNOTATIONS}" ]; then
     sed -i "/annotations/d" "service.json.sed"
   else
-    SERVICE_ANNOTATIONS=`echo $SERVICE_ANNOTATIONS | sed 's#\/#\\\/#g'`
+    SERVICE_ANNOTATIONS=`echo ${SERVICE_ANNOTATIONS} | sed 's#\/#\\\/#g'`
   fi
   
   sed -e "s/\\\$APP_NAME/${NAME}/g;s/\\\$NAMESPACE/${NAMESPACE}/g;s/\\\$SERVICE_TYPE/${SERVICE_TYPE}/g;s/\\\$SERVICE_PORTS/${SERVICE_PORTS}/g;s/\\\$ANNOTATIONS/${SERVICE_ANNOTATIONS}/g;" \
@@ -82,16 +82,16 @@ create_service_config()
 
 create_ingress_config()
 {
-  if [ -z $NAME ] && [ -z $NAMESPACE ] && [ -z $INGRESS_RULES ]; then
+  if [ -z "${NAME}" ] && [ -z "${NAMESPACE}" ] && [ -z "${INGRESS_RULES}" ]; then
     echo "Cann't create ingress json."
     lost_arg_error
   fi
 
-  if [ -z $INGRESS_TLS_SECRET ]; then
+  if [ -z "${INGRESS_TLS_SECRET}" ]; then
     sed -i "/tls/d" "ingress.json.sed"
   fi
 
-  if [ -z $INGRESS_ANNOTATIONS ]; then
+  if [ -z "${INGRESS_ANNOTATIONS}" ]; then
     sed -i "/annotations/d" "ingress.json.sed"
   elif [ "${INGRESS_ANNOTATIONS}" = "hw" ]; then
     INGRESS_ANNOTATIONS='{ "ingress.kubernetes.io/add-base-url": "false", "ingress.kubernetes.io/rewrite-target": "/", "ingress.kubernetes.io/secure-backends": "false", "ingress.beta.kubernetes.io/role": "data" }'
@@ -101,8 +101,8 @@ create_ingress_config()
     INGRESS_ANNOTATIONS='{ "kubernetes.io/ingress.class": "kong", "configuration.konghq.com": "need-strip-path" }'
   fi
 
-  INGRESS_RULES=`echo $INGRESS_RULES | sed 's#\/#\\\/#g'`
-  INGRESS_ANNOTATIONS=`echo $INGRESS_ANNOTATIONS | sed 's#\/#\\\/#g'`
+  INGRESS_RULES=`echo ${INGRESS_RULES} | sed 's#\/#\\\/#g'`
+  INGRESS_ANNOTATIONS=`echo ${INGRESS_ANNOTATIONS} | sed 's#\/#\\\/#g'`
 
   sed -e "s/\\\$APP_NAME/${NAME}/g;s/\\\$NAMESPACE/${NAMESPACE}/g;s/\\\$INGRESS_RULES/${INGRESS_RULES}/g;s/\\\$INGRESS_TLS_SECRET/${INGRESS_TLS_SECRET}/g;s/\\\$ANNOTATIONS/${INGRESS_ANNOTATIONS}/g;" \
   "./ingress.json.sed" > ./ingress.json
@@ -147,7 +147,7 @@ if [ "${INGRESS_RULES}" = "" ]; then
   exit 0;
 fi
 
-if kubectl get ing $NAME -n $NAMESPACE &> /dev/null; then
+if kubectl get ing ${NAME} -n ${NAMESPACE} &> /dev/null; then
   echo "Ingress ${NAMESPACE}.${NAME} already exists. Don't need deployment."
 else
   create_ingress_config

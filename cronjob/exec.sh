@@ -27,29 +27,29 @@ lost_arg_error()
 
 create_cronjob_config()
 {
-  if [ -z $JOB_NAME ] && [ -z $JOB_NAMESPACE ] && [ -z $JOB_SCHEDULE ] && [ -z $JOB_POLICY ] && [ -z $JOB_IMAGE ] && [ -z $JOB_RESOURCES ]; then
+  if [ -z "${JOB_NAME}" ] && [ -z "${JOB_NAMESPACE}" ] && [ -z "${JOB_SCHEDULE}" ] && [ -z "$JOB_POLICY" ] && [ -z "${JOB_IMAGE}" ] && [ -z "${JOB_RESOURCES}" ]; then
     echo "Cann't create cornjob json."
     lost_arg_error
   fi
 
-  if [ -z $IMAGE_PULL_SECRETS ]; then
+  if [ -z "${IMAGE_PULL_SECRETS}" ]; then
     sed -i "/imagePullSecrets/d" "cronjob.json.sed"
   fi
 
-  if [ -z $JOB_ENVIRONMENT ]; then
+  if [ -z "${JOB_ENVIRONMENT}" ]; then
     sed -i "/env/d" "cronjob.json.sed"
   else
-    JOB_ENVIRONMENT=`echo $JOB_ENVIRONMENT | sed 's#\/#\\\/#g'`
+    JOB_ENVIRONMENT=`echo ${JOB_ENVIRONMENT} | sed 's#\/#\\\/#g'`
   fi
 
-  if [ -z $JOB_ARGS ]; then
+  if [ -z "${JOB_ARGS}" ]; then
     sed -i "/args/d" "cronjob.json.sed"
   else
-    JOB_ARGS=`echo $JOB_ARGS | sed 's#\/#\\\/#g'`
+    JOB_ARGS=`echo ${JOB_ARGS} | sed 's#\/#\\\/#g'`
   fi
   
-  JOB_IMAGE_SED=`echo $JOB_IMAGE | sed 's#\/#\\\/#g'`
-  #JOB_SCHEDULE=`echo $JOB_SCHEDULE | sed 's#\/#\\\/#g'`
+  JOB_IMAGE_SED=`echo ${JOB_IMAGE} | sed 's#\/#\\\/#g'`
+  #JOB_SCHEDULE=`echo ${JOB_SCHEDULE} | sed 's#\/#\\\/#g'`
   
   sed -e "s/\\\$JOB_NAME/${JOB_NAME}/g;s/\\\$NAMESPACE/${JOB_NAMESPACE}/g;s/\\\$SCHEDULE/${JOB_SCHEDULE}/g;s/\\\$POLICY/${JOB_POLICY}/g;s/\\\$IMAGE_PULL_SECRETS/${IMAGE_PULL_SECRETS}/g;s/\\\$IMAGE/${JOB_IMAGE_SED}/g;s/\\\$RESOURCES/${JOB_RESOURCES}/g;s/\\\$ENVIRONMENT/${JOB_ENVIRONMENT}/g;s/\\\$ARGS/${JOB_ARGS}/g;" \
   "cronjob.json.sed" > cronjob.json
@@ -65,29 +65,29 @@ create_cronjob_config()
 
 create_job_config()
 {
-  if [ -z $JOB_NAME ] && [ -z $JOB_NAMESPACE ] && [ -z $JOB_IMAGE ] && [ -z $JOB_RESOURCES ]; then
+  if [ -z "${JOB_NAME}" ] && [ -z "${JOB_NAMESPACE}" ] && [ -z "${JOB_IMAGE}" ] && [ -z "${JOB_RESOURCES}" ]; then
     echo "Cann't create job json."
     lost_arg_error
   fi
 
-  if [ -z $IMAGE_PULL_SECRETS ]; then
+  if [ -z "${IMAGE_PULL_SECRETS}" ]; then
     sed -i "/imagePullSecrets/d" "job.json.sed"
   fi
 
-  if [ -z $JOB_ENVIRONMENT ]; then
+  if [ -z "${JOB_ENVIRONMENT}" ]; then
     sed -i "/env/d" "job.json.sed"
   else
-    JOB_ENVIRONMENT=`echo $JOB_ENVIRONMENT | sed 's#\/#\\\/#g'`
+    JOB_ENVIRONMENT=`echo ${JOB_ENVIRONMENT} | sed 's#\/#\\\/#g'`
   fi
 
-  if [ -z $JOB_ARGS ]; then
+  if [ -z "${JOB_ARGS}" ]; then
     sed -i "/args/d" "job.json.sed"
   else
-    JOB_ARGS=`echo $JOB_ARGS | sed 's#\/#\\\/#g'`
+    JOB_ARGS=`echo ${JOB_ARGS} | sed 's#\/#\\\/#g'`
   fi
   
-  JOB_IMAGE_SED=`echo $JOB_IMAGE | sed 's#\/#\\\/#g'`
-  #JOB_SCHEDULE=`echo $JOB_SCHEDULE | sed 's#\/#\\\/#g'`
+  JOB_IMAGE_SED=`echo ${JOB_IMAGE} | sed 's#\/#\\\/#g'`
+  #JOB_SCHEDULE=`echo ${JOB_SCHEDULE} | sed 's#\/#\\\/#g'`
   
   sed -e "s/\\\$JOB_NAME/${JOB_NAME}/g;s/\\\$NAMESPACE/${JOB_NAMESPACE}/g;s/\\\$IMAGE_PULL_SECRETS/${IMAGE_PULL_SECRETS}/g;s/\\\$IMAGE/${JOB_IMAGE_SED}/g;s/\\\$RESOURCES/${JOB_RESOURCES}/g;s/\\\$ENVIRONMENT/${JOB_ENVIRONMENT}/g;s/\\\$ARGS/${JOB_ARGS}/g;" \
   "job.json.sed" > job.json
