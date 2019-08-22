@@ -58,11 +58,11 @@ export KUBE_SERVICE_TYPE='NodePort'
 export KUBE_SERVICE_PORTS='{ "port": 5000, "nodePort": 30001}'
 export KUBE_SERVICE_ANNOTATIONS='{"nginx.gateway.type": "api"}'
 export KUBE_INGRESS_RULES='{                                                                                                        \
-        "host": "domain",                                                                                                           \
+        "host": "test.mydomain.com",                                                                                                           \
         "http": { "paths": [ { "path": "/order-grab", "backend": { "serviceName": "${KUBE_APP}", "servicePort": 30001 } } ] }       \
         }'
 export KUBE_INGRESS_ANNOTATIONS="kong"
-export KUBE_INGRESS_TLS_SECRET=""
+export KUBE_INGRESS_TLS_SECRET='{"secretName":"mydomain-ssl","hosts":["test.mydomain.com"]}'
 
 export KUBE_IMAGE_PULL_SECRETS='{"name":"default-secret"}'
 export KUBE_IMAGE="nginx:1.15-alpine"
