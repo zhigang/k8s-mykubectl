@@ -43,7 +43,7 @@ create_controller_config()
   else
     PORTS="[${PORTS}]"
     READINESS_PORT=`echo ${PORTS} | jq ".[0].containerPort"`
-    READINESSPROBE='{"tcpSocket":{"port":'${READINESS_PORT}'},"initialDelaySeconds":5,"timeoutSeconds":5,"periodSeconds":20,"successThreshold":1,"failureThreshold":5}'
+    READINESSPROBE='{"tcpSocket":{"port":'${READINESS_PORT}'},"initialDelaySeconds":10,"timeoutSeconds":10,"periodSeconds":20,"successThreshold":1,"failureThreshold":6}'
     LIVENESSPROBE=$READINESSPROBE
   fi
   
