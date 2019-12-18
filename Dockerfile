@@ -1,4 +1,4 @@
-FROM lachlanevenson/k8s-kubectl:v1.14.6
+FROM lachlanevenson/k8s-kubectl:v1.14.10
 
 LABEL maintainer="siriuszg <zhigang52110@sina.com>"
 
