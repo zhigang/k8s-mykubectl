@@ -93,12 +93,10 @@ create_ingress_config()
 
   if [ -z "${INGRESS_ANNOTATIONS}" ]; then
     sed -i "/annotations/d" "ingress.json.sed"
-  elif [ "${INGRESS_ANNOTATIONS}" = "hw" ]; then
-    INGRESS_ANNOTATIONS='{ "ingress.kubernetes.io/add-base-url": "false", "ingress.kubernetes.io/rewrite-target": "/", "ingress.kubernetes.io/secure-backends": "false", "ingress.beta.kubernetes.io/role": "data" }'
   elif [ "${INGRESS_ANNOTATIONS}" = "nginx" ]; then
     INGRESS_ANNOTATIONS='{ "kubernetes.io/ingress.class": "nginx", "ingress.kubernetes.io/add-base-url": "false", "ingress.kubernetes.io/rewrite-target": "/" }'
   elif [ "${INGRESS_ANNOTATIONS}" = "kong" ]; then
-    INGRESS_ANNOTATIONS='{ "kubernetes.io/ingress.class": "kong", "configuration.konghq.com": "need-strip-path" }'
+    INGRESS_ANNOTATIONS='{ "kubernetes.io/ingress.class": "kong", "konghq.com/override": "kong-cfg-customization" }'
   fi
 
   INGRESS_RULES=`echo ${INGRESS_RULES} | sed 's#\/#\\\/#g'`
